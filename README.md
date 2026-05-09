@@ -1,6 +1,6 @@
 # Verification of Rubik's Cube Solving Techniques Used by Humans
 The CFOP/Fridrich method of speedsolving is a very popular technique
-for solving Rubik's cubes quickly (hense, "speed solving").
+for solving Rubik's cubes quickly (hence, "speed solving").
 
 For laypeople who don't know how to solve a Rubik's cube, it may seem
 very daunting to actually solve a cube.
@@ -40,7 +40,61 @@ engineering, PL, and math):
   probably want to try to combine some of the cross and F2L, but
   that's breaking an abstraction barrier.)
 - other steps similarly ignore other parts
+- moves that don't change the orientation of a cubie 
 
 We can have some sort of very basic transition system between these
 steps, and prove various invariants about the transition system such
-that eventually, it arrives at a solved cube.
+that eventually, it arrives at a solved cube. 
+
+The specification of every algorithm (sequence of moves to solve a
+particular case) looks something like this:
+```lean
+{ c : Cube // P c /\ unsolved c_i } -> { c : Cube // P c /\ solved c_i }
+```
+(This actually reminds me of separation logic, mostly in that you know
+that different parts are disjoint, and `P` cannot be too strong a
+statement about `c` if `P c` is still going to be true afterwards.)
+
+Eventually, we come to a point where we have
+```lean
+(fun c => solved c_0 /\ ... /\ solved c_n) c
+```
+and at that point, the entire cube is solved.
+
+The specification of the OLL and PLL algorithms however is a bit
+different. OLL algorithms look something like this:
+```lean
+{ c : Cube // P c /\ ~oriented c_i } -> { c : Cube // P c /\ oriented c_i }
+```
+Then PLL algorithms look like this:
+```lean
+{ c : Cube // P c /\ oriented c_i /\ ~solved c_i} ->
+{ c : Cube // P c /\ oriented c_i /\ solved c_i
+```
+
+
+
+## Musings
+The cross ends up being a lot of cases that we think are boring, so we
+only start from states that have already instantiated the
+cross. (Human solvers usually learn how to intuitively solve the
+cross).
+
+We will actually instantiate the beginner's method for the first 2
+layers, since there are less cases for each of the first 2 layers and
+it is more mechanical.
+
+The cases for the F2L as presented on
+[solvethecube.com](https://solvethecube.com/algorithms#f2l) are not
+exhaustive. For several of them, the website actually presents them 
+in their canonical form. Most of them can be transformed into their
+canonical form through U rotations. However, there are cases of
+section 5 (corner in bottom, edge on top) where the edge in question
+is currently trapped in the middle and on a different edge than your
+target edge. These require that you use some combination of 1 of F/R/L/B
+and some applications of U to get to the canonical form.
+
+From F2L, "1 look OLL/PLL" (being able to solve OLL in 1 "step"
+(application of a memorized set of moves) to reach PLL, and likewise
+with PLL to reach a solved state) becomes a bunch of special cases.
+
