@@ -8,3 +8,7 @@ name = "Team11Project"
 [[lean_exe]]
 name = "team-11-project"
 root = "Main"
+
+[[require]]
+name = "Rubik"
+git = "https://github.com/vihdzp/rubik-lean4.git"
